@@ -1,0 +1,8 @@
+keras
+wheel
+pandas
+lxml
+html5lib
+BeautifulSoup4
+matplotlib==2.2.2
+tensorflow
