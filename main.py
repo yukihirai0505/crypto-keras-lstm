@@ -1,3 +1,4 @@
+# ref: https://medium.com/@siavash_37715/how-to-predict-bitcoin-and-ethereum-price-with-rnn-lstm-in-keras-a6d8ee8a5109
 import datetime
 import gc
 import time
