@@ -9,7 +9,7 @@ import pandas as pd
 from keras.layers import Activation, Dense
 from keras.layers import Dropout
 from keras.layers import LSTM
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 
 # LSTMレイヤーの隠れ層の数
 neurons = 512
@@ -55,7 +55,7 @@ def add_volatility(data, coins=['BTC', 'ETH']):
         # calculate the daily change
         kwargs = {coin + '_change': lambda x: (x[coin + '_Close**'] - x[coin + '_Open*']) / x[coin + '_Open*'],
                   coin + '_close_off_high': lambda x: 2 * (x[coin + '_High'] - x[coin + '_Close**']) / (
-                      x[coin + '_High'] - x[coin + '_Low']) - 1,
+                          x[coin + '_High'] - x[coin + '_Low']) - 1,
                   coin + '_volatility': lambda x: (x[coin + '_High'] - x[coin + '_Low']) / (x[coin + '_Open*'])}
         data = data.assign(**kwargs)
     return data
@@ -124,8 +124,6 @@ def plot_results(model, coin):
     plt.legend(['Actual', 'Predicted'])
 
     date_list = date_labels()
-    print(len(date_list))
-    print(date_list)
 
     ax1.set_xticks([x for x in range(len(date_list))])
     ax1.set_xticklabels([date for date in date_list], rotation='vertical')
@@ -155,34 +153,29 @@ X_train, X_test = to_array(X_train), to_array(X_test)
 print(np.shape(X_train), np.shape(X_test), np.shape(Y_train_btc), np.shape(Y_test_btc))
 print(np.shape(X_train), np.shape(X_test), np.shape(Y_train_eth), np.shape(Y_test_eth))
 
-# clean up the memory
-gc.collect()
 
-# random seed for reproducibility
-np.random.seed(202)
+def build(coin):
+    # clean up the memory
+    gc.collect()
 
-# initialise model architecture
-btc_model = build_model(X_train, output_size=1, neurons=neurons)
+    # random seed for reproducibility
+    np.random.seed(202)
 
-# train model on data
-btc_history = btc_model.fit(X_train, Y_train_btc, epochs=epochs, batch_size=batch_size, verbose=1,
-                            validation_data=(X_test, Y_test_btc), shuffle=False)
+    # initialise model architecture
+    model = build_model(X_train, output_size=1, neurons=neurons)
 
-plot_results(btc_model, coin='BTC')
+    # train model on data
+    model.fit(X_train, Y_train_btc, epochs=epochs, batch_size=batch_size, verbose=1,
+              validation_data=(X_test, Y_test_btc), shuffle=False)
+    model.save('./' + coin + '.h5')
 
-# For Ethereum predict
 
-# # clean up the memory
-# gc.collect()
-#
-# # random seed for reproducibility
-# np.random.seed(202)
-#
-# # initialise model architecture
-# eth_model = build_model(X_train, output_size=1, neurons=neurons)
-#
-# # train model on data
-# eth_history = eth_model.fit(X_train, Y_train_eth, epochs=epochs, batch_size=batch_size, verbose=1,
-#                             validation_data=(X_test, Y_test_eth), shuffle=False)
-#
-# plot_results(eth_history, eth_model, Y_train_eth, coin='ETH')
+try:
+    plot_results(load_model('btc.h5'), 'BTC')
+except:
+    build('btc')
+
+try:
+    plot_results(load_model('eth.h5'), 'ETH')
+except:
+    build('eth')
