@@ -13,6 +13,7 @@ from keras.models import Sequential
 
 # LSTMレイヤーの隠れ層の数
 neurons = 512
+# 活性化関数
 activation_function = 'tanh'  # activation function for LSTM and Dense layer
 loss = 'mse'  # loss function for calculating the gradient, in this case Mean Squared Error
 optimizer = 'adam'  # optimizer for appljying gradient decent
@@ -114,6 +115,7 @@ def date_labels():
 
 
 def plot_results(model, coin):
+    ax1 = plt.subplot()
     plt.plot(test_set[coin + '_Close**'][window_len:].values.tolist())
     plt.plot(((np.transpose(model.predict(X_test)) + 1) * test_set[coin + '_Close**'].values[:-window_len])[0])
     plt.xlabel('Dates')
@@ -122,14 +124,11 @@ def plot_results(model, coin):
     plt.legend(['Actual', 'Predicted'])
 
     date_list = date_labels()
+    print(len(date_list))
     print(date_list)
-    plt.xticks([x for x in range(len(date_list))])
-    #
-    #
-    # ax1.set_xticks([x for x in range(len(date_list))])
-    # for label in ax1.set_xticklabels([date for date in date_list], rotation='vertical')[::2]:
-    #     label.set_visible(False)
 
+    ax1.set_xticks([x for x in range(len(date_list))])
+    ax1.set_xticklabels([date for date in date_list], rotation='vertical')
     show()
 
 
